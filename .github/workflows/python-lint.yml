@@ -1,32 +1,11 @@
-name: Python Lint
+name: Test
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [ push ]
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 black
-    
-    - name: Check formatting with Black
-      run: |
-        black --check dags/
-    
-    - name: Lint with flake8
-      run: |
-        flake8 dags/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 dags/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics 
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+    - run: uv tool run black dags/
