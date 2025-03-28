@@ -31,8 +31,8 @@ Working Directory: {os.getcwd()}
 
 with DAG(
     dag_id="my_dag_name",
-    start_date=datetime.datetime(2021, 1, 1),
-    schedule="@daily",
+    start_date=datetime.datetime.now(),
+    catchup=False,
 ):
     print_info = PythonOperator(
         task_id="print_system_info", python_callable=print_system_info
