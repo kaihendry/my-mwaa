@@ -29,4 +29,3 @@ with DAG(
         task_id="log_git_version",
         bash_command=f'echo "DAG Version (Git Commit): {GIT_COMMIT_HASH}"',
     )
-
