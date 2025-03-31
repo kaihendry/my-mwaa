@@ -8,9 +8,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: astral-sh/setup-uv@v5
-    - run: run: uvx black . --check --diff --color
+    - run: uvx black . --check --diff --color
     - run: uv export -o requirements.txt
     - uses: micael-grilo/airflow-dags-test-action@v2.10.3
       with:
         dags-path: ./dags
         dags-test-folder: ./tests
+        access-token: ${{ secrets.GITHUB_TOKEN }}
