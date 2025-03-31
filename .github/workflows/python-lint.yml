@@ -13,3 +13,4 @@ jobs:
     - uses: micael-grilo/airflow-dags-test-action@v2.10.3
       with:
         dags-path: ./dags
+        dags-test-folder: ./tests

@@ -7,3 +7,9 @@ requires-python = ">=3.9"
 dependencies = [
     "apache-airflow>=2.10.5",
 ]
+
+[dependency-groups]
+dev = [
+    "apache-airflow>=2.10.5",
+    "pytest>=8.3.5",
+]
