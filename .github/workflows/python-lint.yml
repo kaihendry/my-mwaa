@@ -8,5 +8,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: astral-sh/setup-uv@v5
-    - run: uv tool run black dags/
+    - run: make test
     - uses: micael-grilo/airflow-dags-test-action@v2.10.3
