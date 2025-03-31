@@ -10,8 +10,6 @@ jobs:
     - uses: astral-sh/setup-uv@v5
     - run: uvx black . --check --diff --color
     - run: uv export -o requirements.txt
-    - uses: micael-grilo/airflow-dags-test-action@v2.10.3
+    - uses: jayamanikharyono/airflow-dag-action@v2.3
       with:
-        dags-path: ./dags
-        dags-test-folder: ./tests
-        access-token: ${{ secrets.GITHUB_TOKEN }}
+        accessToken: ${{ secrets.GITHUB_TOKEN }}
