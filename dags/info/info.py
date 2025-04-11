@@ -8,6 +8,10 @@ from pathlib import Path
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+import structlog
+
+logger = structlog.get_logger()
+
 
 def print_system_info():
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -28,10 +32,11 @@ def print_system_info():
     print(f"File Name: {file_name}")
     print(f"Python Version: {python_version}")
     print(f"Platform Info: {platform_info}")
+    logger.info("hello world")
 
 
 with DAG(
-    dag_id="my_dag_name",
+    dag_id="airflowinfo",
     start_date=datetime.datetime.now(),
     catchup=False,
 ):
