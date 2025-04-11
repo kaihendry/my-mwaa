@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "apache-airflow>=2.10.5",
+    "structlog>=25.2.0",
 ]
 
 [dependency-groups]

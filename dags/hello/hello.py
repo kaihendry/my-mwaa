@@ -12,22 +12,22 @@ from airflow.operators.python import PythonOperator
 def print_system_info():
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     file_name = Path(__file__).name
-    env = os.getenv("AIRFLOW_ENV", "production")
+    # get all env vars
+    env = os.environ
     python_version = sys.version
     platform_info = platform.platform()
 
-    print(
-        f"""
-System Information:
-------------------
-Current Time: {current_time}
-File Name: {file_name}
-Environment: {env}
-Python Version: {python_version}
-Platform: {platform_info}
-Working Directory: {os.getcwd()}
-    """
-    )
+    # print all env vars
+    print("Environment Variables:")
+    for key, value in env.items():
+        print(f"{key}: {value}")
+
+    # print sys info
+    print("System Information:")
+    print(f"Current Time: {current_time}")
+    print(f"File Name: {file_name}")
+    print(f"Python Version: {python_version}")
+    print(f"Platform Info: {platform_info}")
 
 
 with DAG(
