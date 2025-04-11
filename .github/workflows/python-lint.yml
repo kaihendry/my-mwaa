@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: astral-sh/setup-uv@v5
     - run: uvx black . --check --diff --color
-    - run: uv export -o requirements.txt
+    - run: make requirements.txt
     - uses: jayamanikharyono/airflow-dag-action@v2.3
       with:
         accessToken: ${{ secrets.GITHUB_TOKEN }}
