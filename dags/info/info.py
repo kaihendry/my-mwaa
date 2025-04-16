@@ -1,4 +1,3 @@
-# Version: 0.0.0
 import datetime
 import os
 import sys
