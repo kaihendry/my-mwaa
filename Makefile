@@ -5,7 +5,8 @@ BUCKET := march-dag-mwaa-test
 
 init: format requirements.txt
 	#aws s3 mb s3://$(BUCKET)
-	aws s3 sync --delete --exclude ".*" . s3://$(BUCKET)
+	aws s3 sync --delete --exclude ".*" dags s3://$(BUCKET)/dags/
+	aws s3 cp requirements.txt s3://$(BUCKET)/requirements.txt
 
 format:
 	uvx black dags/
