@@ -1,9 +1,11 @@
 AIRFLOW_VERSION := 2.10.3
 PYTHON_VERSION := 3.11
+AIRFLOW := KaiAirflowEnvironment
+BUCKET := march-dag-mwaa-test
 
 init: format requirements.txt
-	#aws s3 mb s3://march-dag-mwaa-test
-	aws s3 sync --delete --exclude ".*" . s3://march-dag-mwaa-test
+	#aws s3 mb s3://$(BUCKET)
+	aws s3 sync --delete --exclude ".*" . s3://$(BUCKET)
 
 format:
 	uvx black dags/
@@ -15,7 +17,7 @@ test: format
 	uv run airflow dags test -S dags my_dag_name
 
 logs:
-	aws mwaa get-environment --name TryAirflowEnvironment \
+	aws mwaa get-environment --name $(AIRFLOW) \
         --query 'Environment.LastUpdate.Error.ErrorResponse.Errors[*].ErrorMessage' \
 		--output text
 
