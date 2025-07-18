@@ -79,7 +79,8 @@ with DAG(
         max_messages=1,
         wait_time_seconds=20,
         timeout=300,  # 5 minutes timeout
-        poke_interval=30,  # Check every 30 seconds
+        poke_interval=60,  # Check every minute
+        mode="reschedule",  # Free up worker between checks
         visibility_timeout=None,
         message_filtering=None,  # Remove filtering for now
         message_filtering_match_values=None,

@@ -10,3 +10,4 @@ We use the Wizard to create the VPC and all logging is enabled to debug
 requirements.txt issue with our test bucket: s3://march-dag-mwaa-test
 
 https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/operators/sqs.html
+
