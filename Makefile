@@ -3,20 +3,17 @@ PYTHON_VERSION := 3.11
 AIRFLOW := KaiAirflowEnvironment
 BUCKET := march-dag-mwaa-test
 
-init: format requirements.txt
+init: requirements.txt
 	#aws s3 mb s3://$(BUCKET)
 	aws s3 sync --delete --exclude ".*" dags s3://$(BUCKET)/dags/
 	aws s3 cp requirements.txt s3://$(BUCKET)/requirements.txt
-
-format:
-	uvx black dags/
 
 requirements.txt: pyproject.toml
 	curl -L "https://raw.githubusercontent.com/apache/airflow/constraints-$(AIRFLOW_VERSION)/constraints-$(PYTHON_VERSION).txt" > constraints.txt
 	uv pip compile pyproject.toml --constraint constraints.txt -o requirements.txt
 
-test: format
-	uv run airflow dags test -S dags my_dag_name
+test:
+	uv run airflow dags test -S dags example_sqs
 
 logs:
 	aws mwaa get-environment --name $(AIRFLOW) \
