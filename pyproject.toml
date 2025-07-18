@@ -3,7 +3,9 @@ name = "my-mwaa"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
+    "apache-airflow[amazon]==2.10.3",
+    "boto3>=1.35.36",
     "structlog>=25.2.0",
 ]

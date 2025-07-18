@@ -11,8 +11,9 @@ init: format requirements.txt
 format:
 	uvx black dags/
 
-requirements.txt:
-	uv export -o requirements.txt
+requirements.txt: pyproject.toml
+	curl -L "https://raw.githubusercontent.com/apache/airflow/constraints-$(AIRFLOW_VERSION)/constraints-$(PYTHON_VERSION).txt" > constraints.txt
+	uv pip compile pyproject.toml --constraint constraints.txt -o requirements.txt
 
 test: format
 	uv run airflow dags test -S dags my_dag_name
