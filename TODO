@@ -1,5 +1,0 @@
-Add in Git commit - Wait for Airflow version 3
-
-Structured logging - structlog - requirements.txt
-
-Can I run locally? Yes, but you don't want to. https://aws.amazon.com/blogs/containers/hosting-amazon-managed-workflows-for-apache-airflow-mwaa-local-runner-on-amazon-ecs-fargate-for-development-and-testing/
