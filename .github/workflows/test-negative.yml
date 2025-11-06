@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allow manual triggering
+  workflow_dispatch: # Allow manual triggering
 
 env:
   AWS_REGION: eu-west-2
@@ -19,37 +19,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5.1.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Verify AWS credentials
-        run: |
-          echo "Verifying AWS credentials..."
-          aws sts get-caller-identity
-          echo "✓ AWS authentication successful"
-
-      - name: Deploy DAGs to S3
-        run: |
-          echo "Deploying DAGs to S3 (including failing_dag)..."
-          echo "Source: dags/"
-          echo "Destination: s3://${{ env.S3_BUCKET }}/dags/"
-
-          aws s3 sync \
-            --delete \
-            --exclude ".*" \
-            --exclude "*.pyc" \
-            --exclude "__pycache__/*" \
-            dags/ \
-            s3://${{ env.S3_BUCKET }}/dags/
-
-          echo "✓ DAGs deployed successfully"
 
       - name: Wait for MWAA to pick up changes
         run: |
