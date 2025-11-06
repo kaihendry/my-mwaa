@@ -33,3 +33,24 @@ AWS_REGION ?= eu-west-2
 MWAA_ENVIRONMENT_NAME ?= MyAirflowEnvironment
 DAG_ID ?= my_dag_name
 TIMEOUT_MINUTES ?= 10
+S3_BUCKET ?= $(MONTH)-dag-mwaa-test
+
+# Configure MWAA environment with requirements.txt and enable DAGs by default
+configure-mwaa:
+	@echo "Configuring MWAA environment: $(MWAA_ENVIRONMENT_NAME)"
+	@echo "1. Setting requirements.txt path..."
+	aws mwaa update-environment \
+		--name $(MWAA_ENVIRONMENT_NAME) \
+		--region $(AWS_REGION) \
+		--requirements-s3-path requirements.txt \
+		--airflow-configuration-options "core.dags_are_paused_at_creation=False"
+	@echo "Configuration update initiated. This will take 20-30 minutes to complete."
+	@echo "Monitor status with: make check-mwaa-status"
+
+# Check MWAA environment status
+check-mwaa-status:
+	@aws mwaa get-environment \
+		--name $(MWAA_ENVIRONMENT_NAME) \
+		--region $(AWS_REGION) \
+		--query 'Environment.{Status:Status,LastUpdate:LastUpdate.Status,RequirementsS3Path:RequirementsS3Path,AirflowConfigurationOptions:AirflowConfigurationOptions}' \
+		--output table
