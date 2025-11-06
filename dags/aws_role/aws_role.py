@@ -6,12 +6,46 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 
-def print_aws_role():
-    """Print AWS role information from the Airflow runtime environment."""
+def print_aws_role(**context):
+    """Print AWS role information from the Airflow runtime environment.
+
+    This function detects how the DAG was triggered:
+    - Via Makefile/script: Uses dag_run.conf with 'triggered_by' (from $USER env var)
+    - Via Airflow UI: Detected as run_type='manual' with no conf
+    - Via Scheduler: Detected as run_type='scheduled'
+    """
     print("=" * 80)
     print("AWS Role Information")
     print("=" * 80)
     print()
+
+    # Get DAG run context information
+    dag_run = context.get("dag_run")
+    if dag_run:
+        print("DAG Run Trigger Information:")
+        print(f"  Run ID:       {dag_run.run_id}")
+        print(f"  Run Type:     {dag_run.run_type}")
+        print(f"  Logical Date: {dag_run.logical_date}")
+
+        # Check if triggered with configuration (from script or API)
+        conf = dag_run.conf or {}
+        if conf:
+            triggered_by = conf.get("triggered_by", "N/A")
+            trigger_source = conf.get("trigger_source", "N/A")
+            timestamp = conf.get("timestamp", "N/A")
+
+            print(f"  Triggered By: {triggered_by}")
+            print(f"  Trigger Source: {trigger_source}")
+            print(f"  Trigger Time: {timestamp}")
+        else:
+            # Manual trigger from UI or scheduled
+            if dag_run.run_type == "manual":
+                print("  Triggered By: Manual trigger from Airflow UI")
+            elif dag_run.run_type == "scheduled":
+                print("  Triggered By: Airflow Scheduler")
+            else:
+                print(f"  Triggered By: {dag_run.run_type}")
+        print()
 
     try:
         # Get caller identity using AWS CLI

@@ -54,3 +54,31 @@ check-mwaa-status:
 		--region $(AWS_REGION) \
 		--query 'Environment.{Status:Status,LastUpdate:LastUpdate.Status,RequirementsS3Path:RequirementsS3Path,AirflowConfigurationOptions:AirflowConfigurationOptions}' \
 		--output table
+
+# Quick trigger for aws_role_info DAG
+check-aws-role:
+	@echo "Checking AWS role in MWAA runtime..."
+	AWS_REGION=$(AWS_REGION) \
+	MWAA_ENVIRONMENT_NAME=$(MWAA_ENVIRONMENT_NAME) \
+	DAG_ID=aws_role_info \
+	TIMEOUT_MINUTES=5 \
+	uv run scripts/trigger_and_wait.py
+
+# Test secrets access in MWAA
+test-secrets:
+	@echo "Testing AWS Secrets Manager access..."
+	AWS_REGION=$(AWS_REGION) \
+	MWAA_ENVIRONMENT_NAME=$(MWAA_ENVIRONMENT_NAME) \
+	DAG_ID=secrets_test \
+	TIMEOUT_MINUTES=5 \
+	uv run scripts/trigger_and_wait.py
+
+# Setup secrets for testing
+setup-secrets:
+	@echo "Setting up AWS Secrets Manager for MWAA..."
+	bash scripts/setup-secret.sh
+
+# Cleanup secrets
+cleanup-secrets:
+	@echo "Cleaning up AWS Secrets Manager resources..."
+	bash scripts/cleanup-secret.sh
