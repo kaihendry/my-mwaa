@@ -46,7 +46,25 @@ def get_mwaa_cli_token(environment_name, region):
         token_data = json.loads(result.stdout)
         return token_data["CliToken"], token_data["WebServerHostname"]
     except subprocess.CalledProcessError as e:
-        print(f"Error getting CLI token: {e.stderr}", file=sys.stderr)
+        error_msg = e.stderr
+        # Check for common credential expiration errors
+        if any(keyword in error_msg for keyword in [
+            "ExpiredToken", "security token", "expired",
+            "InvalidAccessKeyId", "SignatureDoesNotMatch"
+        ]):
+            print("\n" + "="*70, file=sys.stderr)
+            print("🔴 AWS CREDENTIALS EXPIRED OR INVALID", file=sys.stderr)
+            print("="*70, file=sys.stderr)
+            print("\nYour AWS credentials have expired or are invalid.", file=sys.stderr)
+            print("\nTo fix this:", file=sys.stderr)
+            print("  1. Refresh your AWS SSO credentials locally", file=sys.stderr)
+            print("  2. Update GitHub secrets with fresh credentials:", file=sys.stderr)
+            print("     bash scripts/add-temp-credentials.sh", file=sys.stderr)
+            print("\nOriginal error:", file=sys.stderr)
+            print(f"  {error_msg}", file=sys.stderr)
+            print("="*70, file=sys.stderr)
+        else:
+            print(f"Error getting CLI token: {error_msg}", file=sys.stderr)
         sys.exit(1)
     except (json.JSONDecodeError, KeyError) as e:
         print(f"Error parsing token response: {e}", file=sys.stderr)
