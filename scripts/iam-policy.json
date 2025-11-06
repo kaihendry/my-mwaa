@@ -24,6 +24,17 @@
       "Resource": [
         "arn:aws:airflow:eu-west-2:160071257600:environment/MyAirflowEnvironment"
       ]
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:GetLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": [
+        "arn:aws:logs:eu-west-2:160071257600:log-group:airflow-MyAirflowEnvironment-Task:*"
+      ]
     }
   ]
 }

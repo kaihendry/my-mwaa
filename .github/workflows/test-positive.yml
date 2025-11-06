@@ -1,0 +1,95 @@
+name: Test Positive Case
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  AWS_REGION: eu-west-2
+  MWAA_ENVIRONMENT_NAME: MyAirflowEnvironment
+  S3_BUCKET: nov-dag-mwaa-test
+  TIMEOUT_MINUTES: 10
+
+jobs:
+  deploy-and-test-success:
+    name: Deploy and Test Successful DAG
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS credentials
+        run: |
+          echo "Verifying AWS credentials..."
+          aws sts get-caller-identity
+          echo "✓ AWS authentication successful"
+
+      - name: Deploy DAGs to S3
+        run: |
+          echo "Deploying DAGs to S3..."
+          echo "Source: dags/"
+          echo "Destination: s3://${{ env.S3_BUCKET }}/dags/"
+
+          aws s3 sync \
+            --delete \
+            --exclude ".*" \
+            --exclude "*.pyc" \
+            --exclude "__pycache__/*" \
+            dags/ \
+            s3://${{ env.S3_BUCKET }}/dags/
+
+          echo "✓ DAGs deployed successfully"
+
+      - name: Wait for MWAA to pick up changes
+        run: |
+          echo "Waiting 30 seconds for MWAA to detect DAG changes..."
+          sleep 30
+          echo "✓ Wait complete"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Trigger successful DAG and wait for completion
+        run: |
+          echo "Testing positive case: my_dag_name"
+          echo "Expected: DAG should complete successfully"
+          uv run scripts/trigger_and_wait.py
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          MWAA_ENVIRONMENT_NAME: ${{ env.MWAA_ENVIRONMENT_NAME }}
+          DAG_ID: my_dag_name
+          TIMEOUT_MINUTES: ${{ env.TIMEOUT_MINUTES }}
+          USER: ${{ github.actor }}
+
+      - name: Report success
+        if: success()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✓ Positive test PASSED!"
+          echo "  DAG: my_dag_name"
+          echo "  Status: Completed successfully"
+          echo "  Triggered by: ${{ github.actor }}"
+          echo "  Commit: ${{ github.sha }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+          echo "✗ Positive test FAILED!" >&2
+          echo "  DAG: my_dag_name" >&2
+          echo "  Expected: Success" >&2
+          echo "  Actual: Failed" >&2
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+          exit 1

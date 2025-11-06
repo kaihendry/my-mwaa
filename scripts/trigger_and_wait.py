@@ -84,15 +84,24 @@ def execute_mwaa_cli_command(webserver_hostname, token, command):
 
 
 def trigger_dag(environment_name, region, dag_id):
-    """Trigger a DAG run and return the run ID."""
+    """Trigger a DAG run and return the run ID and webserver hostname."""
     print(f"\nTriggering DAG: {dag_id}")
 
     # Get a fresh token (valid for 60 seconds)
     token, webserver_hostname = get_mwaa_cli_token(environment_name, region)
 
-    # Add note and conf to identify this was triggered by our script
-    trigger_note = "Triggered by GitHub Actions deployment script"
-    command = f'dags trigger {dag_id} --conf \'{{"triggered_by":"github-actions-script","timestamp":"{datetime.now(timezone.utc).isoformat()}"}}\''
+    # Get user info
+    user = os.environ.get('USER', os.environ.get('USERNAME', 'unknown'))
+    print(f"  Triggered by: {user}")
+
+    # Add conf to identify this was triggered by our script and who triggered it
+    conf = {
+        "triggered_by": user,
+        "trigger_source": "github-actions-script",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    conf_json = json.dumps(conf).replace('"', '\\"')
+    command = f'dags trigger {dag_id} --conf "{conf_json}"'
 
     try:
         stdout, stderr = execute_mwaa_cli_command(webserver_hostname, token, command)
@@ -107,18 +116,18 @@ def trigger_dag(environment_name, region, dag_id):
         if match:
             dag_run_id = match.group(0)
             print(f"✓ DAG run triggered: {dag_run_id}")
-            return dag_run_id
+            return dag_run_id, webserver_hostname
 
         # Fallback: extract timestamp and construct run ID
         match = re.search(r'(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2})', stdout)
         if match:
             dag_run_id = f"manual__{match.group(1)}"
             print(f"✓ DAG run triggered: {dag_run_id}")
-            return dag_run_id
+            return dag_run_id, webserver_hostname
 
         # If we can't parse, that's okay - we'll check the latest run
         print("✓ DAG triggered (will monitor latest run)")
-        return None
+        return None, webserver_hostname
 
     except Exception as e:
         print(f"Failed to trigger DAG: {e}", file=sys.stderr)
@@ -182,6 +191,56 @@ def get_dag_run_state(environment_name, region, dag_id, dag_run_id):
         return None, None
 
 
+def get_cloudwatch_logs(environment_name, region, log_group, log_stream):
+    """Fetch logs from CloudWatch."""
+    try:
+        result = subprocess.run(
+            [
+                "aws", "logs", "get-log-events",
+                "--log-group-name", log_group,
+                "--log-stream-name", log_stream,
+                "--region", region,
+                "--output", "json"
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=30
+        )
+
+        log_data = json.loads(result.stdout)
+        events = log_data.get("events", [])
+
+        if events:
+            # Extract just the messages
+            messages = [event["message"] for event in events]
+            return "\n".join(messages)
+        return None
+    except subprocess.TimeoutExpired:
+        return None
+    except subprocess.CalledProcessError:
+        return None
+    except Exception:
+        return None
+
+
+def get_task_list(environment_name, region, dag_id, dag_run_id):
+    """Get list of tasks for a DAG run."""
+    try:
+        token, webserver_hostname = get_mwaa_cli_token(environment_name, region)
+
+        command = f"tasks list {dag_id}"
+        stdout, stderr = execute_mwaa_cli_command(webserver_hostname, token, command)
+
+        if stdout:
+            # Parse task list - one task per line
+            tasks = [line.strip() for line in stdout.split('\n') if line.strip() and not line.startswith('[')]
+            return tasks
+        return []
+    except Exception:
+        return []
+
+
 def wait_for_completion(environment_name, region, dag_id, dag_run_id, timeout_minutes=10):
     """Wait for DAG run to complete, polling every 30 seconds."""
     print(f"\nWaiting for DAG run to complete (timeout: {timeout_minutes} minutes)...")
@@ -197,7 +256,7 @@ def wait_for_completion(environment_name, region, dag_id, dag_run_id, timeout_mi
 
         if elapsed > timeout_seconds:
             print(f"\n✗ Timeout reached after {timeout_minutes} minutes", file=sys.stderr)
-            return False
+            return False, None
 
         state, run_info = get_dag_run_state(environment_name, region, dag_id, dag_run_id)
 
@@ -220,7 +279,7 @@ def wait_for_completion(environment_name, region, dag_id, dag_run_id, timeout_mi
                 print(f"  Run ID: {run_info.get('run_id')}")
                 print(f"  Start: {run_info.get('start_date')}")
                 print(f"  End: {run_info.get('end_date')}")
-            return True
+            return True, run_info
 
         elif state == "failed":
             print("─" * 60)
@@ -229,7 +288,7 @@ def wait_for_completion(environment_name, region, dag_id, dag_run_id, timeout_mi
                 print(f"  Run ID: {run_info.get('run_id')}", file=sys.stderr)
                 print(f"  Start: {run_info.get('start_date')}", file=sys.stderr)
                 print(f"  End: {run_info.get('end_date')}", file=sys.stderr)
-            return False
+            return False, run_info
 
         elif state in ["running", "queued"]:
             time.sleep(poll_interval)
@@ -263,16 +322,83 @@ def main():
     print("=" * 60)
 
     # Trigger DAG
-    dag_run_id = trigger_dag(environment_name, region, dag_id)
+    dag_run_id, webserver_hostname = trigger_dag(environment_name, region, dag_id)
 
     # Wait for completion
-    success = wait_for_completion(
+    success, run_info = wait_for_completion(
         environment_name,
         region,
         dag_id,
         dag_run_id,
         timeout_minutes
     )
+
+    # Show additional information after completion (success or failure)
+    if run_info:
+        final_run_id = run_info.get('run_id', dag_run_id)
+
+        print("\n" + "=" * 60)
+        print("Additional Information")
+        print("=" * 60)
+
+        # Show Airflow UI URL
+        if final_run_id:
+            # URL encode the run_id
+            from urllib.parse import quote
+            encoded_run_id = quote(final_run_id, safe='')
+            airflow_url = f"https://{webserver_hostname}/dags/{dag_id}/grid?dag_run_id={encoded_run_id}"
+            print(f"\n📊 Airflow UI:")
+            print(f"  {airflow_url}")
+
+        # Show CloudWatch logs inline
+        if final_run_id:
+            # Convert run_id to log stream format: only replace colons with underscores, keep + signs
+            run_id_log = final_run_id.replace(':', '_')
+            log_group = f"airflow-{environment_name}-Task"
+
+            # Get task list
+            tasks = get_task_list(environment_name, region, dag_id, final_run_id)
+            if tasks:
+                # Fetch and display logs for each task
+                for task in tasks:
+                    log_stream = f"dag_id={dag_id}/run_id={run_id_log}/task_id={task}/attempt=1.log"
+
+                    print(f"\n📄 Task Logs: {task}")
+                    print("─" * 60)
+
+                    # Fetch logs from CloudWatch (with retry - logs take a few seconds to appear)
+                    logs = None
+                    for attempt in range(3):
+                        logs = get_cloudwatch_logs(environment_name, region, log_group, log_stream)
+                        if logs:
+                            break
+                        if attempt < 2:
+                            time.sleep(5)  # Wait 5 seconds before retry
+
+                    if logs:
+                        # Filter and display relevant log lines
+                        for line in logs.split('\n'):
+                            # Skip empty lines
+                            if not line.strip():
+                                continue
+
+                            # Highlight important lines
+                            if any(keyword in line for keyword in ['ERROR', 'FAILED', 'Exception', 'Traceback', 'raised exception']):
+                                print(f"  🔴 {line}")
+                            elif 'INFO' in line or 'System Information' in line or '=' in line[:10]:
+                                print(f"  {line}")
+                            elif 'Triggered by' in line or 'Processing' in line:
+                                print(f"  {line}")
+                    else:
+                        print(f"  ⚠️  Logs not yet available in CloudWatch")
+                        print(f"  Log stream: {log_stream}")
+                        print(f"  (Logs may take a few seconds to appear)")
+
+                print("─" * 60)
+            else:
+                print("\n  ⚠️  Task list not available")
+
+        print("=" * 60)
 
     # Exit with appropriate code
     sys.exit(0 if success else 1)

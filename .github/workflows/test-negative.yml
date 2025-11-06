@@ -1,0 +1,118 @@
+name: Test Negative Case
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  AWS_REGION: eu-west-2
+  MWAA_ENVIRONMENT_NAME: MyAirflowEnvironment
+  S3_BUCKET: nov-dag-mwaa-test
+  TIMEOUT_MINUTES: 5
+
+jobs:
+  test-failure-handling:
+    name: Test DAG Failure Detection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS credentials
+        run: |
+          echo "Verifying AWS credentials..."
+          aws sts get-caller-identity
+          echo "✓ AWS authentication successful"
+
+      - name: Deploy DAGs to S3
+        run: |
+          echo "Deploying DAGs to S3 (including failing_dag)..."
+          echo "Source: dags/"
+          echo "Destination: s3://${{ env.S3_BUCKET }}/dags/"
+
+          aws s3 sync \
+            --delete \
+            --exclude ".*" \
+            --exclude "*.pyc" \
+            --exclude "__pycache__/*" \
+            dags/ \
+            s3://${{ env.S3_BUCKET }}/dags/
+
+          echo "✓ DAGs deployed successfully"
+
+      - name: Wait for MWAA to pick up changes
+        run: |
+          echo "Waiting 30 seconds for MWAA to detect DAG changes..."
+          sleep 30
+          echo "✓ Wait complete"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Trigger failing DAG and verify it fails as expected
+        id: test_failure
+        run: |
+          echo "Testing negative case: failing_dag"
+          echo "Expected: DAG should fail with ZeroDivisionError"
+          echo ""
+
+          # Run the trigger script and capture the exit code
+          set +e  # Don't exit on error
+          uv run scripts/trigger_and_wait.py
+          EXIT_CODE=$?
+          set -e  # Re-enable exit on error
+
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Test Result Analysis"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          if [ $EXIT_CODE -eq 1 ]; then
+            echo "✓ Test PASSED!"
+            echo "  DAG: failing_dag"
+            echo "  Expected: Failure (exit code 1)"
+            echo "  Actual: Failure (exit code $EXIT_CODE)"
+            echo "  Status: Error handling is working correctly ✓"
+            echo "  Triggered by: ${{ github.actor }}"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            exit 0
+          elif [ $EXIT_CODE -eq 0 ]; then
+            echo "✗ Test FAILED!" >&2
+            echo "  DAG: failing_dag" >&2
+            echo "  Expected: Failure (exit code 1)" >&2
+            echo "  Actual: Success (exit code 0)" >&2
+            echo "  Status: The DAG should have failed but succeeded!" >&2
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+            exit 1
+          else
+            echo "✗ Test FAILED!" >&2
+            echo "  DAG: failing_dag" >&2
+            echo "  Expected: Failure (exit code 1)" >&2
+            echo "  Actual: Unexpected exit code $EXIT_CODE" >&2
+            echo "  Status: Something unexpected happened" >&2
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+            exit 1
+          fi
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          MWAA_ENVIRONMENT_NAME: ${{ env.MWAA_ENVIRONMENT_NAME }}
+          DAG_ID: failing_dag
+          TIMEOUT_MINUTES: ${{ env.TIMEOUT_MINUTES }}
+          USER: ${{ github.actor }}
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "Negative test workflow completed"
+          echo "This workflow verifies that DAG failures are properly detected"
