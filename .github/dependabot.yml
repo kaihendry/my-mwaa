@@ -1,0 +1,16 @@
+version: 2
+
+multi-ecosystem-groups:
+  python:
+    schedule:
+      interval: "weekly"  # or whatever schedule you want
+
+updates:
+- package-ecosystem: "pip"
+  directory: "/"
+  multi-ecosystem-group: python
+  patterns: ["*"]
+- package-ecosystem: "uv"
+  directory: "/"
+  multi-ecosystem-group: python
+  patterns: ["*"]
