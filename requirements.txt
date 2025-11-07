@@ -4,7 +4,7 @@ aiohappyeyeballs==2.4.3
     # via
     #   -c constraints.txt
     #   aiohttp
-aiohttp==3.10.10
+aiohttp==3.12.14
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-http
@@ -47,13 +47,13 @@ apache-airflow-providers-common-io==1.4.2
     # via
     #   -c constraints.txt
     #   apache-airflow
-apache-airflow-providers-common-sql==1.19.0
+apache-airflow-providers-common-sql==1.24.1
     # via
     #   -c constraints.txt
     #   apache-airflow
     #   apache-airflow-providers-amazon
     #   apache-airflow-providers-sqlite
-apache-airflow-providers-fab==1.5.0
+apache-airflow-providers-fab==1.5.2
     # via
     #   -c constraints.txt
     #   apache-airflow
@@ -188,7 +188,7 @@ croniter==5.0.1
     # via
     #   -c constraints.txt
     #   apache-airflow
-cryptography==42.0.8
+cryptography==44.0.1
     # via
     #   -c constraints.txt
     #   apache-airflow
@@ -234,7 +234,7 @@ flask==2.2.5
     #   flask-session
     #   flask-sqlalchemy
     #   flask-wtf
-flask-appbuilder==4.5.2
+flask-appbuilder==4.8.1
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-fab
@@ -301,7 +301,7 @@ gunicorn==23.0.0
     # via
     #   -c constraints.txt
     #   apache-airflow
-h11==0.14.0
+h11==0.16.0
     # via
     #   -c constraints.txt
     #   httpcore
@@ -347,7 +347,7 @@ itsdangerous==2.2.0
     #   connexion
     #   flask
     #   flask-wtf
-jinja2==3.1.4
+jinja2==3.1.6
     # via
     #   -c constraints.txt
     #   apache-airflow
@@ -536,7 +536,7 @@ propcache==0.2.0
     # via
     #   -c constraints.txt
     #   yarl
-protobuf==4.25.5
+protobuf==4.25.8
     # via
     #   -c constraints.txt
     #   googleapis-common-protos
@@ -609,7 +609,7 @@ pyyaml==6.0.2
     #   apispec
     #   clickclick
     #   connexion
-redshift-connector==2.1.3
+redshift-connector==2.1.7
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-amazon
@@ -618,7 +618,7 @@ referencing==0.35.1
     #   -c constraints.txt
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
+requests==2.32.4
     # via
     #   -c constraints.txt
     #   apache-airflow
@@ -680,7 +680,7 @@ sniffio==1.3.1
     #   -c constraints.txt
     #   anyio
     #   httpx
-snowflake-connector-python==3.12.3
+snowflake-connector-python==3.13.1
     # via
     #   -c constraints.txt
     #   my-mwaa (pyproject.toml)
@@ -766,7 +766,7 @@ universal-pathlib==0.2.5
     # via
     #   -c constraints.txt
     #   apache-airflow
-urllib3==2.2.3
+urllib3==2.5.0
     # via
     #   -c constraints.txt
     #   botocore
@@ -775,7 +775,7 @@ watchtower==3.3.1
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-amazon
-werkzeug==2.2.3
+werkzeug==3.0.6
     # via
     #   -c constraints.txt
     #   apache-airflow
