@@ -35,17 +35,16 @@ DAG_ID ?= my_dag_name
 TIMEOUT_MINUTES ?= 10
 S3_BUCKET ?= $(MONTH)-dag-mwaa-test
 
-# Configure MWAA environment with requirements.txt and enable DAGs by default
+# Configure MWAA environment with all recommended settings
+# - Sets requirements.txt path
+# - Enables new DAGs automatically (no manual toggle needed)
+# - Configures fast DAG detection (30s instead of 5 minutes)
 configure-mwaa:
-	@echo "Configuring MWAA environment: $(MWAA_ENVIRONMENT_NAME)"
-	@echo "1. Setting requirements.txt path..."
-	aws mwaa update-environment \
-		--name $(MWAA_ENVIRONMENT_NAME) \
-		--region $(AWS_REGION) \
-		--requirements-s3-path requirements.txt \
-		--airflow-configuration-options "core.dags_are_paused_at_creation=False"
-	@echo "Configuration update initiated. This will take 20-30 minutes to complete."
-	@echo "Monitor status with: make check-mwaa-status"
+	@echo "Configuring MWAA environment..."
+	S3_BUCKET=$(S3_BUCKET) \
+	AWS_REGION=$(AWS_REGION) \
+	MWAA_ENVIRONMENT_NAME=$(MWAA_ENVIRONMENT_NAME) \
+	bash scripts/configure-mwaa.sh
 
 # Check MWAA environment status
 check-mwaa-status:
@@ -54,6 +53,23 @@ check-mwaa-status:
 		--region $(AWS_REGION) \
 		--query 'Environment.{Status:Status,LastUpdate:LastUpdate.Status,RequirementsS3Path:RequirementsS3Path,AirflowConfigurationOptions:AirflowConfigurationOptions}' \
 		--output table
+
+# Force MWAA to reinstall requirements.txt (after uploading new requirements)
+update-requirements:
+	@echo "Forcing MWAA to reinstall requirements.txt..."
+	S3_BUCKET=$(S3_BUCKET) \
+	AWS_REGION=$(AWS_REGION) \
+	MWAA_ENVIRONMENT_NAME=$(MWAA_ENVIRONMENT_NAME) \
+	bash scripts/update-requirements.sh
+
+# Check what packages are actually installed in MWAA
+check-packages:
+	@echo "Checking installed packages in MWAA..."
+	AWS_REGION=$(AWS_REGION) \
+	MWAA_ENVIRONMENT_NAME=$(MWAA_ENVIRONMENT_NAME) \
+	DAG_ID=check_packages \
+	TIMEOUT_MINUTES=5 \
+	uv run scripts/trigger_and_wait.py
 
 # Quick trigger for aws_role_info DAG
 check-aws-role:
@@ -82,3 +98,12 @@ setup-secrets:
 cleanup-secrets:
 	@echo "Cleaning up AWS Secrets Manager resources..."
 	bash scripts/cleanup-secret.sh
+
+# Test Snowflake connection from MWAA
+test-snowflake:
+	@echo "Testing Snowflake connection from MWAA..."
+	AWS_REGION=$(AWS_REGION) \
+	MWAA_ENVIRONMENT_NAME=$(MWAA_ENVIRONMENT_NAME) \
+	DAG_ID=snowflake_test \
+	TIMEOUT_MINUTES=10 \
+	uv run scripts/trigger_and_wait.py

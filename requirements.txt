@@ -96,6 +96,7 @@ asn1crypto==1.5.1
     # via
     #   -c constraints.txt
     #   scramp
+    #   snowflake-connector-python
 attrs==24.2.0
     # via
     #   -c constraints.txt
@@ -142,14 +143,17 @@ certifi==2024.8.30
     #   httpcore
     #   httpx
     #   requests
+    #   snowflake-connector-python
 cffi==1.17.1
     # via
     #   -c constraints.txt
     #   cryptography
+    #   snowflake-connector-python
 charset-normalizer==3.4.0
     # via
     #   -c constraints.txt
     #   requests
+    #   snowflake-connector-python
 click==8.1.7
     # via
     #   -c constraints.txt
@@ -188,6 +192,8 @@ cryptography==42.0.8
     # via
     #   -c constraints.txt
     #   apache-airflow
+    #   pyopenssl
+    #   snowflake-connector-python
 deprecated==1.2.14
     # via
     #   -c constraints.txt
@@ -209,6 +215,10 @@ email-validator==2.2.0
     # via
     #   -c constraints.txt
     #   flask-appbuilder
+filelock==3.16.1
+    # via
+    #   -c constraints.txt
+    #   snowflake-connector-python
 flask==2.2.5
     # via
     #   -c constraints.txt
@@ -310,6 +320,7 @@ idna==3.10
     #   email-validator
     #   httpx
     #   requests
+    #   snowflake-connector-python
     #   yarl
 importlib-metadata==6.11.0
     # via
@@ -495,6 +506,7 @@ packaging==24.1
     #   marshmallow
     #   marshmallow-sqlalchemy
     #   redshift-connector
+    #   snowflake-connector-python
     #   sqlalchemy-redshift
 pathspec==0.12.1
     # via
@@ -504,6 +516,10 @@ pendulum==3.0.0
     # via
     #   -c constraints.txt
     #   apache-airflow
+platformdirs==4.3.6
+    # via
+    #   -c constraints.txt
+    #   snowflake-connector-python
 pluggy==1.5.0
     # via
     #   -c constraints.txt
@@ -548,6 +564,11 @@ pyjwt==2.9.0
     #   apache-airflow
     #   flask-appbuilder
     #   flask-jwt-extended
+    #   snowflake-connector-python
+pyopenssl==24.2.1
+    # via
+    #   -c constraints.txt
+    #   snowflake-connector-python
 python-daemon==3.1.0
     # via
     #   -c constraints.txt
@@ -581,6 +602,7 @@ pytz==2024.2
     #   croniter
     #   flask-babel
     #   redshift-connector
+    #   snowflake-connector-python
 pyyaml==6.0.2
     # via
     #   -c constraints.txt
@@ -605,6 +627,7 @@ requests==2.32.3
     #   opentelemetry-exporter-otlp-proto-http
     #   redshift-connector
     #   requests-toolbelt
+    #   snowflake-connector-python
 requests-toolbelt==1.0.0
     # via
     #   -c constraints.txt
@@ -657,6 +680,14 @@ sniffio==1.3.1
     #   -c constraints.txt
     #   anyio
     #   httpx
+snowflake-connector-python==3.12.3
+    # via
+    #   -c constraints.txt
+    #   my-mwaa (pyproject.toml)
+sortedcontainers==2.4.0
+    # via
+    #   -c constraints.txt
+    #   snowflake-connector-python
 soupsieve==2.6
     # via
     #   -c constraints.txt
@@ -711,6 +742,10 @@ time-machine==2.16.0
     # via
     #   -c constraints.txt
     #   pendulum
+tomlkit==0.13.2
+    # via
+    #   -c constraints.txt
+    #   snowflake-connector-python
 typing-extensions==4.12.2
     # via
     #   -c constraints.txt
@@ -718,6 +753,7 @@ typing-extensions==4.12.2
     #   flask-limiter
     #   limits
     #   opentelemetry-sdk
+    #   snowflake-connector-python
 tzdata==2024.2
     # via
     #   -c constraints.txt

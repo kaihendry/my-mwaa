@@ -27,10 +27,48 @@ mwaa $ aws mwaa list-environments
 }
 
 This is AWS Managed Airflow 2.x test environment using the AWS_PROFILE
-PowerUserPlusRole-160071257600 which needs to be renewed every hour, via
-`assume`.
+PowerUserPlusRole-160071257600. You might need to run `aws sso login --profile
+PowerUserPlusRole-160071257600` to refresh the token every hour.
 
 Use uv for Python packaging and management https://docs.astral.sh/uv
+
+## MWAA Configuration
+
+The environment is configured with optimized settings for development:
+
+```bash
+make configure-mwaa
+```
+
+This sets:
+- **requirements.txt** path: Automatic Python dependency installation
+- **core.dags_are_paused_at_creation=False**: New DAGs auto-enable (no manual toggle)
+- **scheduler.dag_dir_list_interval=30**: New DAGs appear in ~30 seconds (default: 5 minutes)
+- **scheduler.min_file_process_interval=30**: DAG changes detected in ~30 seconds
+
+⚠️ **Note**: Configuration changes take 20-30 minutes to apply.
+
+Check status: `make check-mwaa-status`
+
+## Updating Python Dependencies
+
+When you add new Python packages to `pyproject.toml`:
+
+```bash
+# 1. Regenerate requirements.txt
+make requirements.txt
+
+# 2. Upload to S3
+aws s3 cp requirements.txt s3://nov-dag-mwaa-test/requirements.txt
+
+# 3. Force MWAA to reinstall packages (takes 20-30 minutes)
+make update-requirements
+
+# 4. After update completes, verify packages are installed
+make check-packages
+```
+
+The `check-packages` DAG will show all installed packages including versions.
 
 ## GitHub Actions: Deploy and Test DAGs
 

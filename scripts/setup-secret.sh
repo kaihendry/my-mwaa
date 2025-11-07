@@ -46,14 +46,46 @@ echo ""
 # Create or update the secret
 echo "Step 2: Creating/updating secret in Secrets Manager..."
 
-SECRET_VALUE=$(cat <<EOF
-{
-  "database_password": "MySecretPassword123!",
-  "api_key": "sk-test-1234567890abcdef",
-  "environment": "production"
-}
-EOF
-)
+# Read Snowflake keys
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PRIVATE_KEY_FILE="$PROJECT_ROOT/keys/snowflake_tf_snow_key.p8"
+PUBLIC_KEY_FILE="$PROJECT_ROOT/keys/snowflake_tf_snow_key.pub"
+
+if [ ! -f "$PRIVATE_KEY_FILE" ]; then
+    echo "Error: Private key file not found: $PRIVATE_KEY_FILE" >&2
+    exit 1
+fi
+
+if [ ! -f "$PUBLIC_KEY_FILE" ]; then
+    echo "Error: Public key file not found: $PUBLIC_KEY_FILE" >&2
+    exit 1
+fi
+
+echo "  Reading Snowflake keys..."
+PRIVATE_KEY=$(cat "$PRIVATE_KEY_FILE")
+PUBLIC_KEY=$(cat "$PUBLIC_KEY_FILE")
+
+# Create JSON with escaped keys
+SECRET_VALUE=$(jq -n \
+  --arg db_pass "MySecretPassword123!" \
+  --arg api_key "sk-test-1234567890abcdef" \
+  --arg env "production" \
+  --arg sf_account "xbjfxng-qm18685" \
+  --arg sf_user "TERRAFORM_SVC" \
+  --arg sf_role "ACCOUNTADMIN" \
+  --arg private_key "$PRIVATE_KEY" \
+  --arg public_key "$PUBLIC_KEY" \
+  '{
+    database_password: $db_pass,
+    api_key: $api_key,
+    environment: $env,
+    snowflake_account: $sf_account,
+    snowflake_user: $sf_user,
+    snowflake_role: $sf_role,
+    snowflake_private_key: $private_key,
+    snowflake_public_key: $public_key
+  }')
 
 # Check if secret exists
 SECRET_EXISTS=$(aws secretsmanager describe-secret \
