@@ -688,7 +688,7 @@ sortedcontainers==2.4.0
     # via
     #   -c constraints.txt
     #   snowflake-connector-python
-soupsieve==2.6
+soupsieve==2.8.4
     # via
     #   -c constraints.txt
     #   beautifulsoup4
