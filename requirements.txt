@@ -775,7 +775,7 @@ watchtower==3.3.1
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-amazon
-werkzeug==3.0.6
+werkzeug==3.1.6
     # via
     #   -c constraints.txt
     #   apache-airflow
