@@ -188,7 +188,7 @@ croniter==5.0.1
     # via
     #   -c constraints.txt
     #   apache-airflow
-cryptography==44.0.1
+cryptography==48.0.1
     # via
     #   -c constraints.txt
     #   apache-airflow

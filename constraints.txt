@@ -270,7 +270,7 @@ coverage==7.6.4
 crcmod==1.7
 cron-descriptor==1.4.5
 croniter==5.0.1
-cryptography==44.0.1
+cryptography==48.0.1
 curlify==2.2.1
 databricks-sql-connector==2.9.6
 dataclasses-json==0.6.7
