@@ -61,7 +61,7 @@ apache-airflow-providers-ftp==3.11.1
     # via
     #   -c constraints.txt
     #   apache-airflow
-apache-airflow-providers-http==4.13.2
+apache-airflow-providers-http==6.0.0
     # via
     #   -c constraints.txt
     #   apache-airflow
