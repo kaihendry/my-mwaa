@@ -416,7 +416,7 @@ markupsafe==3.0.2
     #   mako
     #   werkzeug
     #   wtforms
-marshmallow==3.23.1
+marshmallow==4.3.0
     # via
     #   -c constraints.txt
     #   flask-appbuilder
