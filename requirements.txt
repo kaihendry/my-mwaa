@@ -664,7 +664,7 @@ setproctitle==1.3.3
     # via
     #   -c constraints.txt
     #   apache-airflow
-setuptools==80.9.0
+setuptools==83.0.0
     # via
     #   python-daemon
     #   redshift-connector
