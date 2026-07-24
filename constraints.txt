@@ -609,7 +609,7 @@ qdrant-client==1.12.1
 reactivex==4.0.4
 readme_renderer==43.0
 redis==5.2.0
-redshift-connector==2.1.7
+redshift-connector==2.1.14
 referencing==0.35.1
 regex==2024.9.11
 requests-file==2.1.0
