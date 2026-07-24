@@ -555,7 +555,7 @@ pure-sasl==0.6.2
 pure_eval==0.2.3
 py-partiql-parser==0.5.5
 py4j==0.10.9.7
-pyOpenSSL==24.2.1
+pyOpenSSL==26.0.0
 pyarrow-hotfix==0.6
 pyarrow==16.1.0
 pyasn1==0.6.1

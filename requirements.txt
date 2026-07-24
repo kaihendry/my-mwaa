@@ -565,7 +565,7 @@ pyjwt==2.9.0
     #   flask-appbuilder
     #   flask-jwt-extended
     #   snowflake-connector-python
-pyopenssl==24.2.1
+pyopenssl==26.0.0
     # via
     #   -c constraints.txt
     #   snowflake-connector-python
