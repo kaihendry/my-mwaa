@@ -766,7 +766,7 @@ universal-pathlib==0.2.5
     # via
     #   -c constraints.txt
     #   apache-airflow
-urllib3==2.5.0
+urllib3==2.7.0
     # via
     #   -c constraints.txt
     #   botocore
