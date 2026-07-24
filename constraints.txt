@@ -397,7 +397,7 @@ ibm-cloud-sdk-core==3.20.3
 ibmcloudant==0.9.1
 icdiff==2.0.7
 identify==2.6.1
-idna==3.10
+idna==3.15
 ijson==3.3.0
 imagesize==1.4.1
 immutabledict==4.2.0
