@@ -715,7 +715,7 @@ sqlalchemy-utils==0.41.2
     # via
     #   -c constraints.txt
     #   flask-appbuilder
-sqlparse==0.5.1
+sqlparse==0.5.4
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-common-sql
