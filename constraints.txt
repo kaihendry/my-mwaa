@@ -98,7 +98,7 @@ anyascii==0.3.2
 anyio==4.6.2.post1
 apache-airflow-providers-airbyte==4.0.0
 apache-airflow-providers-alibaba==2.9.1
-apache-airflow-providers-amazon==9.0.0
+apache-airflow-providers-amazon==9.28.0
 apache-airflow-providers-apache-beam==5.9.0
 apache-airflow-providers-apache-cassandra==3.6.0
 apache-airflow-providers-apache-drill==2.8.0

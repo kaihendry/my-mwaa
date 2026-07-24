@@ -33,7 +33,7 @@ apache-airflow==2.10.3
     #   apache-airflow-providers-imap
     #   apache-airflow-providers-smtp
     #   apache-airflow-providers-sqlite
-apache-airflow-providers-amazon==9.0.0
+apache-airflow-providers-amazon==9.28.0
     # via
     #   -c constraints.txt
     #   apache-airflow
