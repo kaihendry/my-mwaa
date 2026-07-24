@@ -609,7 +609,7 @@ pyyaml==6.0.2
     #   apispec
     #   clickclick
     #   connexion
-redshift-connector==2.1.7
+redshift-connector==2.1.14
     # via
     #   -c constraints.txt
     #   apache-airflow-providers-amazon
