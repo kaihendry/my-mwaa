@@ -20,7 +20,7 @@ anyio==4.6.2.post1
     # via
     #   -c constraints.txt
     #   httpx
-apache-airflow==2.10.3
+apache-airflow==3.3.0
     # via
     #   my-mwaa (pyproject.toml)
     #   apache-airflow-providers-amazon
