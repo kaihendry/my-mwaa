@@ -215,7 +215,7 @@ email-validator==2.2.0
     # via
     #   -c constraints.txt
     #   flask-appbuilder
-filelock==3.16.1
+filelock==3.32.3
     # via
     #   -c constraints.txt
     #   snowflake-connector-python
