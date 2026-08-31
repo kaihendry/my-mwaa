@@ -680,7 +680,7 @@ sniffio==1.3.1
     #   -c constraints.txt
     #   anyio
     #   httpx
-snowflake-connector-python==3.13.1
+snowflake-connector-python==3.18.1
     # via
     #   -c constraints.txt
     #   my-mwaa (pyproject.toml)
