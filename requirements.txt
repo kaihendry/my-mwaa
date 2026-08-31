@@ -536,7 +536,7 @@ propcache==0.2.0
     # via
     #   -c constraints.txt
     #   yarl
-protobuf==4.25.8
+protobuf==7.36.1
     # via
     #   -c constraints.txt
     #   googleapis-common-protos
